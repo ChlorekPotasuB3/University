@@ -1,0 +1,52 @@
+[
+  {
+    "id": "uw",
+    "name": "University of Warsaw",
+    "city": "Warsaw",
+    "homepage": "https://www.uw.edu.pl",
+    "type": "University",
+    "public": true,
+    "qs2025": 262,
+    "tier": "Top-tier"
+  },
+  {
+    "id": "uj",
+    "name": "Jagiellonian University",
+    "city": "Kraków",
+    "homepage": "https://www.uj.edu.pl",
+    "type": "University",
+    "public": true,
+    "qs2025": 304,
+    "tier": "Top-tier"
+  },
+  {
+    "id": "pw",
+    "name": "Warsaw University of Technology",
+    "city": "Warsaw",
+    "homepage": "https://www.pw.edu.pl",
+    "type": "Politechnic",
+    "public": true,
+    "qs2025": 527,
+    "tier": "Top-tier"
+  },
+  {
+    "id": "agh",
+    "name": "AGH University of Science and Technology",
+    "city": "Kraków",
+    "homepage": "https://www.agh.edu.pl",
+    "type": "Politechnic",
+    "public": true,
+    "qs2025": 901,
+    "tier": "National-tier"
+  },
+  {
+    "id": "ug",
+    "name": "University of Gdańsk",
+    "city": "Gdańsk",
+    "homepage": "https://www.univ.gda.pl",
+    "type": "University",
+    "public": true,
+    "qs2025": 801,
+    "tier": "National-tier"
+  }
+]

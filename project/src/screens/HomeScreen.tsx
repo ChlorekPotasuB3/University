@@ -1,0 +1,300 @@
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+} from 'react-native';
+import { SearchBar } from '../components/SearchBar';
+import { HorizontalCard } from '../components/HorizontalCard';
+import { UniCard } from '../components/UniCard';
+import { FloatingActionButton } from '../components/FloatingActionButton';
+import { FilterChip } from '../components/FilterChip';
+import { CalculatorModal } from './CalculatorModal';
+import { SplashScreen } from './SplashScreen';
+import { University, MaturaResult } from '../types';
+import { DataService } from '../services/dataService';
+import { colors, spacing, typography, shadows } from '../theme';
+import Fuse from 'fuse.js';
+
+interface HomeScreenProps {
+  navigation: any;
+}
+
+export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [filteredUniversities, setFilteredUniversities] = useState<University[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [calculatorVisible, setCalculatorVisible] = useState(false);
+  
+  const dataService = DataService.getInstance();
+
+  useEffect(() => {
+    loadUniversities();
+  }, []);
+
+  useEffect(() => {
+    filterUniversities();
+  }, [universities, searchQuery, selectedFilters]);
+
+  const loadUniversities = async (forceRefresh = false) => {
+    try {
+      setLoading(true);
+      const data = await dataService.getUniversities(forceRefresh);
+      setUniversities(data);
+    } catch (error) {
+      console.error('Error loading universities:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const filterUniversities = () => {
+    let filtered = universities;
+
+    // Apply filters
+    if (selectedFilters.length > 0) {
+      filtered = filtered.filter(uni => 
+        selectedFilters.includes('all') || 
+        selectedFilters.includes(uni.tier) ||
+        selectedFilters.includes(uni.type)
+      );
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const fuse = new Fuse(filtered, {
+        keys: ['name', 'city', 'courses.name'],
+        threshold: 0.3,
+      });
+      const searchResults = fuse.search(searchQuery);
+      filtered = searchResults.map(result => result.item);
+    }
+
+    setFilteredUniversities(filtered);
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadUniversities(true);
+  };
+
+  const handleOpenCalculator = () => {
+    setCalculatorVisible(true);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim() && !recentSearches.includes(query.trim())) {
+      setRecentSearches(prev => [query.trim(), ...prev.slice(0, 2)]);
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
+  const toggleFilter = (filter: string) => {
+    setSelectedFilters(prev => 
+      prev.includes(filter) 
+        ? prev.filter(f => f !== filter)
+        : [...prev, filter]
+    );
+  };
+
+  const handleUniversityPress = (university: University) => {
+    navigation.navigate('Detail', { university });
+  };
+
+  const handleCalculate = (maturaResults: MaturaResult[]) => {
+    setCalculatorVisible(false);
+    navigation.navigate('Results', { maturaResults });
+  };
+
+  const renderHorizontalCard = ({ item }: { item: University }) => (
+    <HorizontalCard
+      university={item}
+      onPress={() => handleUniversityPress(item)}
+    />
+  );
+
+  const renderTopTierCarousel = () => {
+    if (searchQuery.trim()) return null;
+    
+    const topTierUnis = universities
+      .filter(uni => uni.tier === 'Top-tier')
+      .slice(0, 5);
+    
+    if (topTierUnis.length === 0) return null;
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>🏆 Top-Tier Universities</Text>
+        <FlatList
+          data={topTierUnis}
+          renderItem={renderHorizontalCard}
+          keyExtractor={(item) => item.id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalList}
+        />
+      </View>
+    );
+  };
+
+  const renderRecentSearches = () => {
+    if (searchQuery.trim() || recentSearches.length === 0) return null;
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>📚 Recent Searches</Text>
+        {recentSearches.map((search, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.recentItem}
+            onPress={() => setSearchQuery(search)}
+          >
+            <Text style={styles.recentText}>{search}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
+  const renderFilters = () => {
+    const filters = ['Top-tier', 'National-tier', 'Standard', 'public', 'private'];
+    
+    return (
+      <View style={styles.filtersContainer}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.filtersRow}>
+            {filters.map((filter) => (
+              <FilterChip
+                key={filter}
+                label={filter}
+                selected={selectedFilters.includes(filter)}
+                onPress={() => toggleFilter(filter)}
+              />
+            ))}
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
+  if (loading) {
+    return <SplashScreen onLoadComplete={() => setLoading(false)} />;
+  }
+
+  return (
+    <View style={styles.container}>
+      <ScrollView 
+        style={styles.scrollView}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        stickyHeaderIndices={[0]}
+      >
+        <View style={styles.stickyHeader}>
+          <SearchBar
+            value={searchQuery}
+            onChangeText={handleSearch}
+            onClear={clearSearch}
+          />
+        </View>
+
+        {renderFilters()}
+        {renderTopTierCarousel()}
+        {renderRecentSearches()}
+
+        {searchQuery.trim() || selectedFilters.length > 0 ? (
+          <View style={styles.resultsSection}>
+            <Text style={styles.resultsTitle}>
+              Results ({filteredUniversities.length})
+            </Text>
+            {filteredUniversities.map((university) => (
+              <UniCard
+                key={university.id}
+                university={university}
+                onPress={() => handleUniversityPress(university)}
+              />
+            ))}
+          </View>
+        ) : null}
+      </ScrollView>
+
+      <FloatingActionButton onPress={handleOpenCalculator} />
+      
+      <CalculatorModal
+        visible={calculatorVisible}
+        onClose={() => setCalculatorVisible(false)}
+        onCalculate={handleCalculate}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.neutral200,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  stickyHeader: {
+    backgroundColor: colors.neutral200,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.sm,
+    ...shadows.small,
+  },
+  filtersContainer: {
+    backgroundColor: colors.neutral100,
+    paddingVertical: spacing.sm,
+  },
+  filtersRow: {
+    flexDirection: 'row',
+    paddingHorizontal: spacing.md,
+  },
+  section: {
+    backgroundColor: colors.neutral100,
+    marginBottom: spacing.sm,
+    paddingVertical: spacing.md,
+  },
+  sectionTitle: {
+    ...typography.h2,
+    color: colors.neutral800,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+  },
+  horizontalList: {
+    paddingHorizontal: spacing.md,
+  },
+  recentItem: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral300,
+  },
+  recentText: {
+    ...typography.body,
+    color: colors.neutral800,
+  },
+  resultsSection: {
+    backgroundColor: colors.neutral100,
+    paddingTop: spacing.md,
+  },
+  resultsTitle: {
+    ...typography.h2,
+    color: colors.neutral800,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+  },
+});
