@@ -9,6 +9,7 @@ import {
   Linking,
   FlatList,
 } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import { CourseCard } from '../components/CourseCard';
 import { University } from '../types';
 
@@ -46,6 +47,13 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
       default: return '🏅';
     }
   };
+
+import * as WebBrowser from 'expo-web-browser';
+
+const openPdf = (url: string | undefined) => {
+  if (!url) return;
+  WebBrowser.openBrowserAsync(url);
+};
 
   const renderCourseCard = ({ item }: { item: any }) => (
     <CourseCard
@@ -132,8 +140,8 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
                 </View>
               )}
               {university.przelicznikiPdfUrl && (
-                <TouchableOpacity style={styles.websiteButton} onPress={() => Linking.openURL(university.przelicznikiPdfUrl)}>
-                  <Text style={styles.websiteButtonText}>View Admission Criteria (PDF)</Text>
+                <TouchableOpacity onPress={() => openPdf(university.przelicznikiPdfUrl)}>
+                  <Text style={styles.link}>📄 Przeliczniki maturalne</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -319,5 +327,14 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginTop: 12,
     marginBottom: 8,
+  },
+  link: {
+    color: '#007AFF',
+    textDecorationLine: 'underline',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginTop: 8,
+    marginBottom: 8,
+    textAlign: 'center',
   },
 });

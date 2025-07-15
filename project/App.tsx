@@ -1,6 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Linking, Alert, Text } from 'react-native';
+import { Provider as PaperProvider, Switch, Appbar, FAB, Button, Text as PaperText } from 'react-native-paper';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import uniDataRaw from './PolishUniversityApp/assets/data/universities.json';
 import { Hero } from './src/components/Hero';
 import { SearchBar } from './src/components/SearchBar';
@@ -23,6 +25,11 @@ const uniData: University[] = uniDataRaw as University[];
 export default function App() {
   const [search, setSearch] = useState('');
   const [calculatorVisible, setCalculatorVisible] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
+  const theme = isDark
+    ? { ...DarkTheme, colors: { ...DarkTheme.colors, primary: '#2563EB' } }
+    : { ...DefaultTheme, colors: { ...DefaultTheme.colors, primary: '#2563EB' } };
 
   const openHomepage = (homepage?: string) => {
     if (homepage && typeof homepage === 'string' && homepage.trim().length > 0) {
@@ -40,47 +47,61 @@ export default function App() {
     (uni.type && uni.type.toLowerCase().includes(search.toLowerCase()))
   );
 
+  function HeaderRight({ isDark, toggle }: { isDark: boolean; toggle: () => void }) {
+    return (
+      <Appbar.Header>
+        <Appbar.Content title="PolandUniFinder" />
+        <Switch value={isDark} onValueChange={toggle} color="#2563EB" />
+      </Appbar.Header>
+    );
+  }
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#f4f6fb' }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-        <Hero />
-        <View style={styles.searchWrap}>
-          <SearchBar
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Search university or city..."
-            onClear={() => setSearch('')}
-          />
-        </View>
-        <Text style={styles.sectionTitle}>Universities</Text>
-        <View style={styles.listWrap}>
-          {filtered.length === 0 ? (
-            <Text style={styles.noResults}>No universities found.</Text>
-          ) : (
-            filtered.map(uni => (
-              <UniversityCardModern
-                key={uni.id}
-                university={uni}
-                onPressHomepage={openHomepage}
+    <PaperProvider theme={theme}>
+      <NavigationContainer theme={theme}>
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <HeaderRight isDark={isDark} toggle={() => setIsDark(!isDark)} />
+          <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
+            <Hero />
+            <View style={styles.searchWrap}>
+              <SearchBar
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search university or city..."
+                onClear={() => setSearch('')}
               />
-            ))
-          )}
+            </View>
+            <Text style={styles.sectionTitle}>Universities</Text>
+            <View style={styles.listWrap}>
+              {filtered.length === 0 ? (
+                <Text style={styles.noResults}>No universities found.</Text>
+              ) : (
+                filtered.map(uni => (
+                  <UniversityCardModern
+                    key={uni.id}
+                    university={uni}
+                    onPressHomepage={openHomepage}
+                  />
+                ))
+              )}
+            </View>
+          </ScrollView>
+          <FAB
+            style={styles.fab}
+            icon="calculator"
+            label="Calculator"
+            onPress={() => setCalculatorVisible(true)}
+            color="#fff"
+          />
+          <MaturaCalculator
+            visible={calculatorVisible}
+            onClose={() => setCalculatorVisible(false)}
+            onCalculate={() => setCalculatorVisible(false)}
+          />
+          <StatusBar style="auto" />
         </View>
-      </ScrollView>
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setCalculatorVisible(true)}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.fabText}>🧮 Calculator</Text>
-      </TouchableOpacity>
-      <MaturaCalculator
-        visible={calculatorVisible}
-        onClose={() => setCalculatorVisible(false)}
-        onCalculate={() => setCalculatorVisible(false)}
-      />
-      <StatusBar style="auto" />
-    </View>
+      </NavigationContainer>
+    </PaperProvider>
   );
 }
 
