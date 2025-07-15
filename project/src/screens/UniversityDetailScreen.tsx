@@ -98,12 +98,45 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
               <Text style={styles.infoValue}>{university.tier}</Text>
             </View>
             
-            {university.qsRank && (
-              <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>QS Rank</Text>
-                <Text style={styles.infoValue}>#{university.qsRank}</Text>
-              </View>
-            )}
+            {/* Rankings Section */}
+            <View style={styles.rankingsSection}>
+              <Text style={styles.sectionTitle}>Rankings</Text>
+              {university.qs2026 && (
+                <View style={styles.infoItem}>
+                  <Text style={styles.infoLabel}>QS 2026</Text>
+                  <Text style={styles.infoValue}>{university.qs2026}</Text>
+                </View>
+              )}
+              {university.the2024 && (
+                <View style={styles.infoItem}>
+                  <Text style={styles.infoLabel}>THE 2024</Text>
+                  <Text style={styles.infoValue}>{university.the2024}</Text>
+                </View>
+              )}
+              {university.edurank2025 && (
+                <View style={styles.infoItem}>
+                  <Text style={styles.infoLabel}>EduRank 2025</Text>
+                  <Text style={styles.infoValue}>{university.edurank2025}</Text>
+                </View>
+              )}
+              {university.perspektywy2025 && (
+                <View style={styles.infoItem}>
+                  <Text style={styles.infoLabel}>Perspektywy 2025</Text>
+                  <Text style={styles.infoValue}>{university.perspektywy2025}</Text>
+                </View>
+              )}
+              {university.tier && (
+                <View style={styles.infoItem}>
+                  <Text style={styles.infoLabel}>Tier</Text>
+                  <Text style={styles.infoValue}>{university.tier}</Text>
+                </View>
+              )}
+              {university.przelicznikiPdfUrl && (
+                <TouchableOpacity style={styles.websiteButton} onPress={() => Linking.openURL(university.przelicznikiPdfUrl)}>
+                  <Text style={styles.websiteButtonText}>View Admission Criteria (PDF)</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Courses</Text>
@@ -143,7 +176,7 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: { 
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
@@ -238,37 +271,53 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   websiteButton: {
+  },
+  rankingsSection: {
+    marginTop: 16,
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: '#f0f4ff',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  coursesSection: {
+    marginTop: 24,
+    marginHorizontal: 16,
+  },
+  coursesList: {
+    paddingBottom: 16,
+  },
+  emptyCoursesContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  emptyCoursesText: {
+    color: '#888',
+    fontSize: 16,
+  },
+  websiteButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  websiteButton: {
     backgroundColor: '#007AFF',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 25,
-  },
-  websiteButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  coursesSection: {
-    flex: 1,
-    paddingTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  coursesList: {
-    paddingBottom: 20,
-  },
-  emptyCoursesContainer: {
-    padding: 40,
-    alignItems: 'center',
-  },
-  emptyCoursesText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    marginTop: 12,
+    marginBottom: 8,
   },
 });

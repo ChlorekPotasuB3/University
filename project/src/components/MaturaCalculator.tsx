@@ -71,13 +71,13 @@ export const MaturaCalculator: React.FC<MaturaCalculatorProps> = ({
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onClose}>
-            <Text style={styles.cancelButton}>Cancel</Text>
+        <View style={styles.headerModern}>
+          <TouchableOpacity onPress={onClose} style={styles.headerBtn}>
+            <Text style={styles.cancelButtonModern}>Cancel</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>Matura Calculator</Text>
-          <TouchableOpacity onPress={reset}>
-            <Text style={styles.resetButton}>Reset</Text>
+          <Text style={styles.titleModern}>🧮 Matura Calculator</Text>
+          <TouchableOpacity onPress={reset} style={styles.headerBtn}>
+            <Text style={styles.resetButtonModern}>Reset</Text>
           </TouchableOpacity>
         </View>
 
@@ -174,18 +174,18 @@ export const MaturaCalculator: React.FC<MaturaCalculatorProps> = ({
             </View>
           ))}
 
-          <TouchableOpacity style={styles.addButton} onPress={addResult}>
-            <Text style={styles.addButtonText}>+ Add Subject</Text>
+          <TouchableOpacity style={styles.addButtonModern} onPress={addResult}>
+            <Text style={styles.addButtonTextModern}>+ Add Subject</Text>
           </TouchableOpacity>
         </ScrollView>
 
-        <View style={styles.footer}>
+        <View style={styles.footerModern}>
           <TouchableOpacity
-            style={[styles.calculateButton, results.length === 0 && styles.disabledButton]}
+            style={[styles.calculateButtonModern, results.length === 0 && styles.disabledButtonModern]}
             onPress={handleCalculate}
             disabled={results.length === 0}
           >
-            <Text style={styles.calculateButtonText}>Calculate Qualifications</Text>
+            <Text style={styles.calculateButtonTextModern}>Calculate Qualifications</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -196,33 +196,54 @@ export const MaturaCalculator: React.FC<MaturaCalculatorProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f4f6fb',
   },
-  header: {
+  headerModern: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    backgroundColor: '#17452A',
+    borderBottomLeftRadius: 22,
+    borderBottomRightRadius: 22,
+    shadowColor: '#000',
+    shadowOpacity: 0.07,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
-  title: {
-    fontSize: 18,
+  titleModern: {
+    fontSize: 21,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
+    letterSpacing: 1.1,
   },
-  cancelButton: {
-    fontSize: 16,
-    color: '#007AFF',
+  headerBtn: {
+    padding: 6,
+    borderRadius: 8,
   },
-  resetButton: {
+  cancelButtonModern: {
     fontSize: 16,
-    color: '#FF3B30',
+    color: '#fff',
+    fontWeight: '600',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#B7CBB0',
+    borderRadius: 7,
+  },
+  resetButtonModern: {
+    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    backgroundColor: '#e49b7a',
+    borderRadius: 7,
   },
   content: {
     flex: 1,
-    padding: 16,
+    padding: 18,
   },
   description: {
     fontSize: 16,
@@ -232,14 +253,16 @@ const styles = StyleSheet.create({
   },
   resultCard: {
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 18,
+    shadowColor: '#17452A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.14,
+    shadowRadius: 7,
     elevation: 2,
+    borderWidth: 1,
+    borderColor: '#D0E8D0',
   },
   resultHeader: {
     flexDirection: 'row',
