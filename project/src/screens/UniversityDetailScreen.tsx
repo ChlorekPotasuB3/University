@@ -28,9 +28,7 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
   const { university } = route.params;
 
   const openWebsite = () => {
-    if (university.homepage) {
-      Linking.openURL(university.homepage);
-    }
+    Linking.openURL(university.homepage ?? 'https://google.com');
   };
 
   const getTierColor = (tier: string) => {
@@ -74,15 +72,15 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
 
         <View style={styles.universityInfo}>
           <View style={styles.logoSection}>
-            {university.logo ? (
-              <Image source={{ uri: university.logo }} style={styles.logo} />
+            {typeof university.logo === 'string' && university.logo.trim().length > 0 ? (
+              <Image source={{ uri: String(university.logo ?? '') }} style={styles.logo} />
             ) : (
               <View style={styles.logoPlaceholder}>
                 <Text style={styles.logoText}>🎓</Text>
               </View>
             )}
-            <View style={[styles.tierBadge, { backgroundColor: getTierColor(university.tier) }]}>
-              <Text style={styles.tierIcon}>{getTierIcon(university.tier)}</Text>
+            <View style={[styles.tierBadge, { backgroundColor: getTierColor(String(university.tier || '')) }]}>
+              <Text style={styles.tierIcon}>{getTierIcon(String(university.tier || ''))}</Text>
             </View>
           </View>
 

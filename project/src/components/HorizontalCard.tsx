@@ -13,7 +13,7 @@ export const HorizontalCard: React.FC<HorizontalCardProps> = ({ university, onPr
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.imageContainer}>
-        {university.logo ? (
+        {typeof university.logo === 'string' && university.logo.trim().length > 0 ? (
           <Image source={{ uri: university.logo }} style={styles.logo} />
         ) : (
           <View style={styles.logoPlaceholder}>
@@ -31,7 +31,11 @@ export const HorizontalCard: React.FC<HorizontalCardProps> = ({ university, onPr
         )}
         
         <View style={styles.badgeContainer}>
-          <TierBadge tier={university.tier} />
+          <TierBadge tier={
+            university.tier === 'Top-tier' || university.tier === 'National-tier' || university.tier === 'Standard'
+              ? university.tier
+              : 'Standard'
+          } />
         </View>
       </View>
     </TouchableOpacity>

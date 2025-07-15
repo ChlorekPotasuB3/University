@@ -10,8 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { SearchBar } from '../components/SearchBar';
-import { HorizontalCard } from '../components/HorizontalCard';
-import { UniCard } from '../components/UniCard';
+import { UniversityCard } from '../components/UniversityCard';
 import { FloatingActionButton } from '../components/FloatingActionButton';
 import { FilterChip } from '../components/FilterChip';
 import { CalculatorModal } from './CalculatorModal';
@@ -65,8 +64,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     if (selectedFilters.length > 0) {
       filtered = filtered.filter(uni => 
         selectedFilters.includes('all') || 
-        selectedFilters.includes(uni.tier) ||
-        selectedFilters.includes(uni.type)
+        selectedFilters.includes(String(uni.tier || '')) ||
+        selectedFilters.includes(String(uni.type || ''))
       );
     }
 
@@ -120,13 +119,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     navigation.navigate('Results', { maturaResults });
   };
 
-  const renderHorizontalCard = ({ item }: { item: University }) => (
-    <HorizontalCard
-      university={item}
-      onPress={() => handleUniversityPress(item)}
-    />
-  );
-
+  // Modern top-tier carousel using UniversityCard
   const renderTopTierCarousel = () => {
     if (searchQuery.trim()) return null;
     
@@ -139,14 +132,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     return (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>🏆 Top-Tier Universities</Text>
-        <FlatList
-          data={topTierUnis}
-          renderItem={renderHorizontalCard}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-        />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
+          {topTierUnis.map((university) => (
+            <View key={university.id} style={{ marginRight: 24, width: 350, maxWidth: 400 }}>
+              <UniversityCard university={{...university, logo: String(university.logo || ''), city: String(university.city || ''), type: String(university.type || '')}} onPress={() => handleUniversityPress(university)} />
+            </View>
+          ))}
+        </ScrollView>
       </View>
     );
   };
@@ -220,11 +212,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
               Results ({filteredUniversities.length})
             </Text>
             {filteredUniversities.map((university) => (
-              <UniCard
-                key={university.id}
-                university={university}
-                onPress={() => handleUniversityPress(university)}
-              />
+              <View key={university.id} style={{ marginBottom: 32 }}>
+                <UniversityCard
+                  university={university}
+                  onPress={() => handleUniversityPress(university)}
+                />
+              </View>
             ))}
           </View>
         ) : null}

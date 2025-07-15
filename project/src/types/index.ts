@@ -20,13 +20,23 @@ export interface University {
   id: string;
   name: string;
   city: string;
-  logo: string;
   homepage: string;
+  type: string; // e.g., 'University', 'Politechnic', etc.
+  public?: boolean;
+  qs2026?: number;
+  the2024?: string;
+  edurank2025?: number;
+  perspektywy2025?: number;
+  tier?: string; // e.g., 'S', 'A', 'B', 'C', 'D'
+  przelicznikiPdfUrl?: string;
+  logo?: string;
+  // Legacy/compatibility fields for UI
   qsRank?: number;
+  theRank?: string;
+  edurank?: number;
   perspektywRank?: number;
-  tier: 'Top-tier' | 'National-tier' | 'Standard';
-  type: 'public' | 'private';
-  courses: Course[];
+  usNewsRank?: number;
+  courses: Course[]; // Always defined, never undefined
 }
 
 export interface UniversityData {

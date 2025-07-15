@@ -1,8 +1,33 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Linking } from 'react-native';
-import uniData from './assets/data/universities.json';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Linking, Alert } from 'react-native';
+import uniDataRaw from './assets/data/universities.json';
+
+// Type for university if available
+interface University {
+  id: string;
+  name: string;
+  city: string;
+  homepage?: string;
+  type: string;
+  public?: boolean;
+  qs2025?: number;
+  tier?: string;
+}
+
+// Type-safe data
+const uniData: University[] = uniDataRaw as University[];
 
 export default function App() {
+  const openHomepage = (homepage?: string) => {
+    if (homepage && typeof homepage === 'string' && homepage.trim().length > 0) {
+      Linking.openURL(homepage).catch(() => {
+        Alert.alert('Could not open homepage');
+      });
+    } else {
+      Alert.alert('Homepage not available');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>🇵🇱 Polish Universities</Text>
@@ -10,9 +35,9 @@ export default function App() {
         {uniData.map((uni) => (
           <View key={uni.id} style={styles.card}>
             <Text style={styles.uniName}>{uni.name}</Text>
-            <Text style={styles.uniMeta}>{uni.city} • {uni.type} • {uni.public ? 'Public' : 'Private'}</Text>
-            <Text style={styles.uniRank}>QS 2025: <Text style={{fontWeight:'bold'}}>{uni.qs2025}</Text> | {uni.tier}</Text>
-            <TouchableOpacity style={styles.button} onPress={() => Linking.openURL(uni.homepage)}>
+            <Text style={styles.uniMeta}>{String(uni.city || '')} • {String(uni.type || '')} • {uni.public ? 'Public' : 'Private'}</Text>
+            <Text style={styles.uniRank}>QS 2025: <Text style={{fontWeight:'bold'}}>{uni.qs2025 ?? 'N/A'}</Text> | {uni.tier ?? 'N/A'}</Text>
+            <TouchableOpacity style={styles.button} onPress={() => openHomepage(uni.homepage)}>
               <Text style={styles.buttonText}>Visit Homepage</Text>
             </TouchableOpacity>
           </View>

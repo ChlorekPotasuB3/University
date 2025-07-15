@@ -21,7 +21,7 @@ export const UniCard: React.FC<UniCardProps> = ({ university, onPress, matchingC
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.header}>
         <View style={styles.logoContainer}>
-          {university.logo ? (
+          {typeof university.logo === 'string' && university.logo.trim().length > 0 ? (
             <Image source={{ uri: university.logo }} style={styles.logo} />
           ) : (
             <View style={styles.logoPlaceholder}>
@@ -33,7 +33,11 @@ export const UniCard: React.FC<UniCardProps> = ({ university, onPress, matchingC
         <View style={styles.headerContent}>
           <View style={styles.titleRow}>
             <Text style={styles.name} numberOfLines={2}>{university.name}</Text>
-            <TierBadge tier={university.tier} />
+            <TierBadge tier={
+              university.tier === 'Top-tier' || university.tier === 'National-tier' || university.tier === 'Standard'
+                ? university.tier
+                : 'Standard'
+            } />
           </View>
           
           <Text style={styles.location}>{university.city} • {university.type}</Text>
