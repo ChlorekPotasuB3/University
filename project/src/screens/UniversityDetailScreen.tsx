@@ -9,6 +9,7 @@ import {
   Linking,
   FlatList,
 } from 'react-native';
+import { Chip } from 'react-native-paper';
 import * as WebBrowser from 'expo-web-browser';
 import { CourseCard } from '../components/CourseCard';
 import { University } from '../types';
@@ -48,12 +49,10 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
     }
   };
 
-import * as WebBrowser from 'expo-web-browser';
-
-const openPdf = (url: string | undefined) => {
-  if (!url) return;
-  WebBrowser.openBrowserAsync(url);
-};
+  const openPdf = (url: string | undefined) => {
+    if (!url) return;
+    WebBrowser.openBrowserAsync(url);
+  };
 
   const renderCourseCard = ({ item }: { item: any }) => (
     <CourseCard
@@ -94,6 +93,18 @@ const openPdf = (url: string | undefined) => {
 
           <Text style={styles.universityName}>{university.name}</Text>
           <Text style={styles.city}>{university.city}</Text>
+          {/* Tags/Chips */}
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginVertical: 8 }}>
+            {university.type && (
+              <Chip style={{ marginRight: 8, marginBottom: 4 }}>{university.type}</Chip>
+            )}
+            {university.public !== undefined && (
+              <Chip style={{ marginRight: 8, marginBottom: 4 }}>{university.public ? 'public' : 'private'}</Chip>
+            )}
+            {university.qs2026 && university.qs2026 <= 10 && (
+              <Chip style={{ marginRight: 8, marginBottom: 4 }}>Top 10</Chip>
+            )}
+          </View>
           
           <View style={styles.infoGrid}>
             <View style={styles.infoItem}>
@@ -277,8 +288,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-  },
-  websiteButton: {
   },
   rankingsSection: {
     marginTop: 16,

@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+// @ts-ignore: No type declarations for NetInfo
+import NetInfo from '@react-native-community/netinfo';
+import { Banner } from 'react-native-paper';
 import {
   View,
   Text,
@@ -9,6 +12,7 @@ import {
   RefreshControl,
   ScrollView,
 } from 'react-native';
+import { Button, Chip } from 'react-native-paper';
 import { SearchBar } from '../components/SearchBar';
 import { UniversityCard } from '../components/UniversityCard';
 import { FloatingActionButton } from '../components/FloatingActionButton';
@@ -33,8 +37,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [calculatorVisible, setCalculatorVisible] = useState(false);
-  
+  const [isConnected, setIsConnected] = useState(true);
+  const [bannerVisible, setBannerVisible] = useState(false);
+
   const dataService = DataService.getInstance();
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state: { isConnected: boolean | null }) => {
+      setIsConnected(!!state.isConnected);
+      setBannerVisible(!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     loadUniversities();
@@ -189,6 +203,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Banner
+        visible={bannerVisible}
+        actions={[]}
+        icon="wifi-off"
+        style={{ backgroundColor: '#fffbe8', borderBottomColor: '#ffbe3b', borderBottomWidth: 1 }}
+      >
+        You are offline. Showing cached data.
+      </Banner>
       <ScrollView 
         style={styles.scrollView}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -203,6 +225,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         </View>
 
         {renderFilters()}
+        <View style={{ paddingHorizontal: 16, marginTop: 8, marginBottom: 8 }}>
+          <Button mode="contained" icon="calculator" onPress={handleOpenCalculator} style={{ borderRadius: 24 }}>
+            Open Calculator
+          </Button>
+        </View>
         {renderTopTierCarousel()}
         {renderRecentSearches()}
 
@@ -211,20 +238,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             <Text style={styles.resultsTitle}>
               Results ({filteredUniversities.length})
             </Text>
-            {filteredUniversities.map((university) => (
-              <View key={university.id} style={{ marginBottom: 32 }}>
-                <UniversityCard
-                  university={university}
-                  onPress={() => handleUniversityPress(university)}
-                />
-              </View>
-            ))}
+            {filteredUniversities.map((university) => {
+              // Create tags for each university
+              const tags: string[] = [];
+              if (university.type) tags.push(university.type);
+              if (university.public !== undefined)
+                tags.push(university.public ? 'public' : 'private');
+              if (university.qs2026 && university.qs2026 <= 10) tags.push('Top 10');
+              return (
+                <View key={university.id} style={{ marginBottom: 32 }}>
+                  <UniversityCard
+                    university={university}
+                    onPress={() => handleUniversityPress(university)}
+                  />
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }}>
+                    {tags.map(tag => (
+                      <Chip key={tag} style={{ marginRight: 8, marginBottom: 4 }}>{tag}</Chip>
+                    ))}
+                  </View>
+                </View>
+              );
+            })}
           </View>
         ) : null}
       </ScrollView>
 
-      <FloatingActionButton onPress={handleOpenCalculator} />
-      
       <CalculatorModal
         visible={calculatorVisible}
         onClose={() => setCalculatorVisible(false)}

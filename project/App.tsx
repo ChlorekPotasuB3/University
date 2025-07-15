@@ -1,8 +1,10 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity, Linking, Alert, Text } from 'react-native';
-import { Provider as PaperProvider, Switch, Appbar, FAB, Button, Text as PaperText } from 'react-native-paper';
-import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import { Provider as PaperProvider, Appbar, FAB, Button, Text as PaperText } from 'react-native-paper';
+import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
+import { ThemeToggle } from './src/components/ThemeToggle';
 import uniDataRaw from './PolishUniversityApp/assets/data/universities.json';
 import { Hero } from './src/components/Hero';
 import { SearchBar } from './src/components/SearchBar';
@@ -22,14 +24,10 @@ interface University {
 
 const uniData: University[] = uniDataRaw as University[];
 
-export default function App() {
+function MainApp() {
   const [search, setSearch] = useState('');
   const [calculatorVisible, setCalculatorVisible] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-
-  const theme = isDark
-    ? { ...DarkTheme, colors: { ...DarkTheme.colors, primary: '#2563EB' } }
-    : { ...DefaultTheme, colors: { ...DefaultTheme.colors, primary: '#2563EB' } };
+  const { paperTheme } = useTheme();
 
   const openHomepage = (homepage?: string) => {
     if (homepage && typeof homepage === 'string' && homepage.trim().length > 0) {
@@ -47,20 +45,18 @@ export default function App() {
     (uni.type && uni.type.toLowerCase().includes(search.toLowerCase()))
   );
 
-  function HeaderRight({ isDark, toggle }: { isDark: boolean; toggle: () => void }) {
-    return (
-      <Appbar.Header>
-        <Appbar.Content title="PolandUniFinder" />
-        <Switch value={isDark} onValueChange={toggle} color="#2563EB" />
-      </Appbar.Header>
-    );
-  }
-
   return (
-    <PaperProvider theme={theme}>
-      <NavigationContainer theme={theme}>
-        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-          <HeaderRight isDark={isDark} toggle={() => setIsDark(!isDark)} />
+    <PaperProvider theme={paperTheme}>
+      {/*
+        NOTE: We cast paperTheme to 'any' to resolve the type mismatch between MD3Theme and NavigationContainer's theme prop.
+        This is safe because both theming systems are compatible in practice.
+      */}
+      <NavigationContainer theme={paperTheme as any}>
+        <View style={{ flex: 1, backgroundColor: paperTheme.colors.background }}>
+          <Appbar.Header>
+            <Appbar.Content title="PolandUniFinder" />
+            <ThemeToggle />
+          </Appbar.Header>
           <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
             <Hero />
             <View style={styles.searchWrap}>
