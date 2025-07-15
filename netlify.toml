@@ -1,0 +1,7 @@
+[build]
+  publish = "project/web-build"
+  command = "npm run build"
+
+[dev]
+  command = "npm start"
+  port = 3000
