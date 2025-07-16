@@ -12,16 +12,11 @@ import {
 import { Chip } from 'react-native-paper';
 import * as WebBrowser from 'expo-web-browser';
 import { CourseCard } from '../components/CourseCard';
-import { University } from '../types';
+import { University, Course } from '../types';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
-interface UniversityDetailScreenProps {
-  navigation: any;
-  route: {
-    params: {
-      university: University;
-    };
-  };
-}
+type UniversityDetailScreenProps = NativeStackScreenProps<RootStackParamList, 'Detail'>;
 
 export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
   navigation,
@@ -176,8 +171,8 @@ export const UniversityDetailScreen: React.FC<UniversityDetailScreenProps> = ({
           {university.courses.length > 0 ? (
             <FlatList
               data={university.courses}
-              renderItem={renderCourseCard}
-              keyExtractor={(item) => item.id}
+              renderItem={({ item, index }: { item: Course, index: number }) => renderCourseCard({ item })}
+              keyExtractor={(item: Course, index: number) => item.id}
               scrollEnabled={false}
               contentContainerStyle={styles.coursesList}
             />
@@ -290,16 +285,16 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   rankingsSection: {
+    width: '100%',
     marginTop: 16,
     marginBottom: 16,
     padding: 16,
     backgroundColor: '#f0f4ff',
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   sectionTitle: {
     fontSize: 18,

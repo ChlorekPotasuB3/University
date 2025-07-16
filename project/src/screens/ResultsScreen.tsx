@@ -10,15 +10,10 @@ import {
 import { CourseCard } from '../components/CourseCard';
 import { MaturaResult, QualificationResult, University } from '../types';
 import { DataService } from '../services/dataService';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
-interface ResultsScreenProps {
-  navigation: any;
-  route: {
-    params: {
-      maturaResults: MaturaResult[];
-    };
-  };
-}
+type ResultsScreenProps = NativeStackScreenProps<RootStackParamList, 'Results'>;
 
 export const ResultsScreen: React.FC<ResultsScreenProps> = ({ navigation, route }) => {
   const [results, setResults] = useState<QualificationResult[]>([]);

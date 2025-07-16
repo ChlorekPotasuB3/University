@@ -11,12 +11,13 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { MaturaRow } from '../components/MaturaRow';
 import { colors, spacing, typography, shadows } from '../theme';
-import { MaturaResult } from '../types';
+import { MaturaResult, Course } from '../types/index';
+import { useSelection } from '../context/SelectionContext';
 
 interface CalculatorModalProps {
   visible: boolean;
   onClose: () => void;
-  onCalculate: (results: MaturaResult[]) => void;
+  onCalculate: (results: MaturaResult[], selectedCourses: Course[]) => void;
 }
 
 export const CalculatorModal: React.FC<CalculatorModalProps> = ({
@@ -24,8 +25,9 @@ export const CalculatorModal: React.FC<CalculatorModalProps> = ({
   onClose,
   onCalculate,
 }) => {
+  const { selectedCourses, clearSelections } = useSelection();
   const [results, setResults] = useState<MaturaResult[]>([
-    { subject: '', level: 'basic', percent: 0 }
+    { subject: '', level: 'basic', percent: 0 },
   ]);
 
   const addSubject = () => {
@@ -45,21 +47,28 @@ export const CalculatorModal: React.FC<CalculatorModalProps> = ({
   };
 
   const handleCalculate = () => {
-    const validResults = results.filter(r => r.subject && r.percent > 0);
-    
-    if (validResults.length === 0) {
-      Alert.alert('Error', 'Please add at least one matura result');
+    if (selectedCourses.length === 0) {
+      // Optionally, show an alert to the user
+      alert('Please select at least one course to calculate your results.');
       return;
     }
-
-    onCalculate(validResults);
+    const validResults = results.filter((r) => r.subject && r.percent > 0);
+    onCalculate(validResults, selectedCourses);
   };
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet">
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Enter your Matura results</Text>
+          <Text style={styles.title}>Matura Calculator</Text>
+          <View style={styles.selectionInfo}>
+            <Text style={styles.selectionText}>
+              {selectedCourses.length} course(s) selected
+            </Text>
+            <TouchableOpacity onPress={clearSelections}>
+              <Text style={styles.clearButton}>Clear</Text>
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Ionicons name="close" size={24} color={colors.neutral800} />
           </TouchableOpacity>
@@ -112,6 +121,21 @@ const styles = StyleSheet.create({
   title: {
     ...typography.h2,
     color: colors.neutral800,
+  },
+  selectionInfo: {
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: spacing.md,
+  },
+  selectionText: {
+    ...typography.small,
+    color: colors.neutral600,
+  },
+  clearButton: {
+    ...typography.small,
+    color: colors.primary,
+    fontWeight: '600',
+    marginTop: spacing.xs,
   },
   closeButton: {
     padding: spacing.sm,

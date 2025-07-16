@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { University, UniversityData, MaturaResult, QualificationResult } from '../types';
+import { University, UniversityData, MaturaResult, QualificationResult, Course } from '../types';
+import * as universityData from '../../assets/data/universities.json';
+import * as courseData from '../../assets/data/courses.json';
 
 const STORAGE_KEY = 'university_data';
 const LAST_UPDATE_KEY = 'last_update';
@@ -34,8 +36,29 @@ export class DataService {
       // Fetch and parse the Ministry CSV point-conversion table
       const ministryPrzeliczniki = await this.fetchMinistryPrzeliczniki();
 
-      // Merge static data with Perspektywy and Ministry datasets
-      let universities = this.getMockData();
+      // Load static data from JSON files
+      let universities: University[] = JSON.parse(JSON.stringify(universityData));
+      const courses: Course[] = JSON.parse(JSON.stringify(courseData)).courses;
+
+      // Create a map of courses by university ID for efficient merging
+      const coursesMap = new Map<string, Course[]>();
+      courses.forEach(course => {
+        // Assuming course has a universityId property
+        const uniId = (course as any).universityId;
+        if (uniId) {
+            if (!coursesMap.has(uniId)) {
+                coursesMap.set(uniId, []);
+            }
+            coursesMap.get(uniId)?.push(course);
+        }
+      });
+
+      // Merge courses into universities
+      universities.forEach(uni => {
+        if (coursesMap.has(uni.id)) {
+            uni.courses = coursesMap.get(uni.id) || [];
+        }
+      });
 
       // Map Perspektywy ranking by university ID or name
       const perspektywyMap = new Map();
@@ -87,22 +110,7 @@ export class DataService {
     }
   }
 
-  // Returns the full university list provided by the user
-  private getMockData(): University[] {
-    // Full dataset from user-provided JSON (truncated for brevity, all universities should be included)
-    return [
-      { "id": "uw", "name": "University of Warsaw", "city": "Warsaw", "homepage": "https://www.uw.edu.pl", "type": "University", "public": true, "qs2026": 271, "the2024": "601–800", "edurank2025": 277, "perspektywy2025": 1, "tier": "S", "przelicznikiPdfUrl": "https://rekrutacja.uw.edu.pl/wp-content/uploads/2025/06/przelicznik_2025.pdf", "courses": [] },
-      { "id": "uj", "name": "Jagiellonian University", "city": "Kraków", "homepage": "https://www.uj.edu.pl", "type": "University", "public": true, "qs2026": 303, "the2024": "601–800", "edurank2025": 310, "perspektywy2025": 2, "tier": "S", "przelicznikiPdfUrl": "https://rekrutacja.uj.edu.pl/assets/wymagania_2025.pdf", "courses": [] },
-      { "id": "pw", "name": "Warsaw University of Technology", "city": "Warsaw", "homepage": "https://www.pw.edu.pl", "type": "Politechnic", "public": true, "qs2026": 487, "the2024": "1201–1500", "edurank2025": 538, "perspektywy2025": 3, "tier": "S", "przelicznikiPdfUrl": "https://rekrutacja.pw.edu.pl/files/przelicznik_2025.pdf", "courses": [] },
-      { "id": "agh", "name": "AGH University of Science and Technology", "city": "Kraków", "homepage": "https://www.agh.edu.pl", "type": "Politechnic", "public": true, "qs2026": 901, "the2024": "1001–1200", "edurank2025": 577, "perspektywy2025": 4, "tier": "A", "przelicznikiPdfUrl": "https://rekrutacja.agh.edu.pl/attachments/przelicznik_2025.pdf", "courses": [] },
-      { "id": "amu", "name": "Adam Mickiewicz University", "city": "Poznań", "homepage": "https://www.amu.edu.pl", "type": "University", "public": true, "qs2026": 801, "the2024": "1001–1200", "edurank2025": 532, "perspektywy2025": 6, "tier": "A", "przelicznikiPdfUrl": "https://rekrutacja.amu.edu.pl/download/przelicznik_2025.pdf", "courses": [] },
-      { "id": "uwr", "name": "University of Wrocław", "city": "Wrocław", "homepage": "https://www.uni.wroc.pl", "type": "University", "public": true, "qs2026": 801, "the2024": "1201–1500", "edurank2025": 599, "perspektywy2025": 7, "tier": "A", "przelicznikiPdfUrl": "https://rekrutacja.uni.wroc.pl/files/przelicznik_2025.pdf", "courses": [] },
-      { "id": "ug", "name": "University of Gdańsk", "city": "Gdańsk", "homepage": "https://www.univ.gda.pl", "type": "University", "public": true, "qs2026": 801, "the2024": "1201–1500", "edurank2025": 783, "perspektywy2025": 8, "tier": "A", "przelicznikiPdfUrl": "https://rekrutacja.univ.gda.pl/files/przelicznik_2025.pdf", "courses": [] },
-      { "id": "umk", "name": "Nicolaus Copernicus University", "city": "Toruń", "homepage": "https://www.umk.pl", "type": "University", "public": true, "qs2026": 801, "the2024": "1201–1500", "edurank2025": 969, "perspektywy2025": 9, "tier": "A", "przelicznikiPdfUrl": "https://rekrutacja.umk.pl/download/przelicznik_2025.pdf", "courses": [] },
-      { "id": "pwr", "name": "Wrocław University of Science and Technology", "city": "Wrocław", "homepage": "https://www.pwr.edu.pl", "type": "Politechnic", "public": true, "qs2026": 801, "the2024": "1201–1500", "edurank2025": 785, "perspektywy2025": 5, "tier": "A", "przelicznikiPdfUrl": "https://rekrutacja.pwr.edu.pl/files/przelicznik_2025.pdf", "courses": [] },
-      { "id": "us", "name": "University of Silesia in Katowice", "city": "Katowice", "homepage": "https://www.us.edu.pl", "type": "University", "public": true, "qs2026": 1201, "the2024": "1201–1500", "edurank2025": 840, "perspektywy2025": 10, "tier": "B", "przelicznikiPdfUrl": "https://rekrutacja.us.edu.pl/download/przelicznik_2025.pdf", "courses": [] }
-    ];
-  }
+
 
   // Fetch and parse the Perspektywy JSON ranking endpoint
   async fetchPerspektywyRanking() {

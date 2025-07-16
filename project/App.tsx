@@ -1,149 +1,29 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, Linking, Alert, Text } from 'react-native';
-import { Provider as PaperProvider, Appbar, FAB, Button, Text as PaperText } from 'react-native-paper';
-import { NavigationContainer } from '@react-navigation/native';
+import React from 'react';
+import { PaperProvider } from 'react-native-paper';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
-import { ThemeToggle } from './src/components/ThemeToggle';
-import uniDataRaw from './PolishUniversityApp/assets/data/universities.json';
-import { Hero } from './src/components/Hero';
-import { SearchBar } from './src/components/SearchBar';
-import { UniversityCardModern } from './src/components/UniversityCardModern';
-import { MaturaCalculator } from './src/components/MaturaCalculator';
+import { AppNavigator } from './src/navigation/AppNavigator';
+import { SelectionProvider } from './src/context/SelectionContext';
+import { StatusBar } from 'expo-status-bar';
 
-interface University {
-  id: string;
-  name: string;
-  city: string;
-  homepage?: string;
-  type: string;
-  public?: boolean;
-  qs2025?: number;
-  tier?: string;
-}
-
-const uniData: University[] = uniDataRaw as University[];
-
+// MainApp component now only sets up the providers and navigator
 function MainApp() {
-  const [search, setSearch] = useState('');
-  const [calculatorVisible, setCalculatorVisible] = useState(false);
-  const { paperTheme } = useTheme();
-
-  const openHomepage = (homepage?: string) => {
-    if (homepage && typeof homepage === 'string' && homepage.trim().length > 0) {
-      Linking.openURL(homepage).catch(() => {
-        Alert.alert('Could not open homepage');
-      });
-    } else {
-      Alert.alert('Homepage not available');
-    }
-  };
-
-  const filtered = uniData.filter(uni =>
-    uni.name.toLowerCase().includes(search.toLowerCase()) ||
-    uni.city.toLowerCase().includes(search.toLowerCase()) ||
-    (uni.type && uni.type.toLowerCase().includes(search.toLowerCase()))
-  );
+  const { paperTheme, isDark } = useTheme();
 
   return (
     <PaperProvider theme={paperTheme}>
-      {/*
-        NOTE: We cast paperTheme to 'any' to resolve the type mismatch between MD3Theme and NavigationContainer's theme prop.
-        This is safe because both theming systems are compatible in practice.
-      */}
-      <NavigationContainer theme={paperTheme as any}>
-        <View style={{ flex: 1, backgroundColor: paperTheme.colors.background }}>
-          <Appbar.Header>
-            <Appbar.Content title="PolandUniFinder" />
-            <ThemeToggle />
-          </Appbar.Header>
-          <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-            <Hero />
-            <View style={styles.searchWrap}>
-              <SearchBar
-                value={search}
-                onChangeText={setSearch}
-                placeholder="Search university or city..."
-                onClear={() => setSearch('')}
-              />
-            </View>
-            <Text style={styles.sectionTitle}>Universities</Text>
-            <View style={styles.listWrap}>
-              {filtered.length === 0 ? (
-                <Text style={styles.noResults}>No universities found.</Text>
-              ) : (
-                filtered.map(uni => (
-                  <UniversityCardModern
-                    key={uni.id}
-                    university={uni}
-                    onPressHomepage={openHomepage}
-                  />
-                ))
-              )}
-            </View>
-          </ScrollView>
-          <FAB
-            style={styles.fab}
-            icon="calculator"
-            label="Calculator"
-            onPress={() => setCalculatorVisible(true)}
-            color="#fff"
-          />
-          <MaturaCalculator
-            visible={calculatorVisible}
-            onClose={() => setCalculatorVisible(false)}
-            onCalculate={() => setCalculatorVisible(false)}
-          />
-          <StatusBar style="auto" />
-        </View>
-      </NavigationContainer>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <AppNavigator />
     </PaperProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  searchWrap: {
-    marginTop: -28,
-    marginBottom: 12,
-    paddingHorizontal: 18,
-    zIndex: 2,
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#17452A',
-    marginLeft: 24,
-    marginBottom: 8,
-    marginTop: 8,
-  },
-  listWrap: {
-    paddingBottom: 32,
-  },
-  noResults: {
-    textAlign: 'center',
-    color: '#888',
-    fontSize: 16,
-    marginTop: 30,
-  },
-  fab: {
-    position: 'absolute',
-    right: 24,
-    bottom: 32,
-    backgroundColor: '#17452A',
-    borderRadius: 25,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
-    shadowColor: '#000',
-    shadowOpacity: 0.14,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 7,
-    zIndex: 10,
-  },
-  fabText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-    letterSpacing: 1.1,
-  },
-});
+// The main App component wraps everything in the ThemeProvider
+export default function App() {
+  return (
+    <SelectionProvider>
+      <ThemeProvider>
+        <MainApp />
+      </ThemeProvider>
+    </SelectionProvider>
+  );
+}

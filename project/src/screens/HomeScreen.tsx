@@ -139,6 +139,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
     
     const topTierUnis = universities
       .filter(uni => uni.tier === 'Top-tier')
+      .sort(() => 0.5 - Math.random()) // Shuffle the array
       .slice(0, 5);
     
     if (topTierUnis.length === 0) return null;
@@ -149,7 +150,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
           {topTierUnis.map((university) => (
             <View key={university.id} style={{ marginRight: 24, width: 350, maxWidth: 400 }}>
-              <UniversityCard university={{...university, logo: String(university.logo || ''), city: String(university.city || ''), type: String(university.type || '')}} onPress={() => handleUniversityPress(university)} />
+              <UniversityCard university={university} onPress={() => handleUniversityPress(university)} />
             </View>
           ))}
         </ScrollView>

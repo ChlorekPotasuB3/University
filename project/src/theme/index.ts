@@ -1,6 +1,6 @@
 // Design tokens based on Polish flag colors and modern mobile standards
 export const colors = {
-  primary: '#2563EB',      // Polish-flag blue
+  primary: '#10B981',      // A modern, appealing green
   accent: '#DC2626',       // Polish-flag red
   neutral100: '#FFFFFF',
   neutral200: '#F5F5F5',
